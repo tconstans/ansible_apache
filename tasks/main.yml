@@ -1,0 +1,37 @@
+---
+# tasks file for apache
+- name: install
+  yum:
+    name:
+    - httpd
+    - mod_ssl
+    state: present
+
+- name: deploy config
+  template:
+    src: "{{ item }}"
+    dest: /etc/httpd/conf.d/
+  notify: restart httpd
+  loop:
+  - ssl_redirect.conf.inc
+
+- name: open firewall
+  firewalld:
+    service: "{{ item }}"
+    immediate: yes
+    permanent: yes
+    state: enabled
+  loop:
+    - http
+    - https
+
+- name: configure logrotate
+  copy:
+    src: logrotate_httpd.conf
+    dest: /etc/logrotate.d/httpd
+
+- name: start httpd
+  service:
+    name: httpd
+    enabled: yes
+    state: started
