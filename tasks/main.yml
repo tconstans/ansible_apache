@@ -4,7 +4,6 @@
   yum:
     name:
     - httpd
-    - mod_ssl
     state: present
 
 - name: deploy config
@@ -15,6 +14,14 @@
   loop:
   - ssl_redirect.conf.inc
 
+- name: set mpm
+  lineinfile:
+    path: /etc/httpd/conf.modules.d/00-mpm.conf
+    regex: "^LoadModule mpm_prefork_module modules/mod_mpm_prefork.so"
+    line: LoadModule mpm_event_module modules/mod_mpm_event.so
+    state: present
+  notify: restart httpd
+
 - name: open firewall
   firewalld:
     service: "{{ item }}"
@@ -24,6 +31,7 @@
   loop:
     - http
     - https
+  when: use_firewalld
 
 - name: configure logrotate
   copy:
@@ -35,3 +43,21 @@
     name: httpd
     enabled: yes
     state: started
+
+- block:
+  - name: install mod_ssl
+    yum:
+      name:
+      - mod_ssl
+      - openssl
+      state: present
+
+  - name: configure ssl
+    lineinfile:
+      path: /etc/httpd/conf.d/ssl.conf
+      regex: ^SSLProtocol
+      line: SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+      state: present
+  when: httpd_have_ssl
+
+
