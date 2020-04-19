@@ -4,6 +4,7 @@
   yum:
     name:
     - httpd
+    - mod_ssl
     state: present
 
 - name: deploy config
@@ -55,9 +56,13 @@
   - name: configure ssl
     lineinfile:
       path: /etc/httpd/conf.d/ssl.conf
-      regex: ^SSLProtocol
-      line: SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+      regex: "{{ item.re }}"
+      line: "{{ item.line }}"
       state: present
+    loop:
+    - { re: "^SSLProtocol", line: "SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1" }
+    #- { re: "^SSLCertificateFile /etc/pki/tls/certs/localhost.crt", line: "SSLCertificateFile  {{ http_ssl_certificate_file}}" }
+    #- { re: "^SSLCertificateKeyFile /etc/pki/tls/private/localhost.key", line: "SSLCertificateKeyFile  {{ http_ssl_certificate_key }}" }
   when: httpd_have_ssl
 
 

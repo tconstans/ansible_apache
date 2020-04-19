@@ -1,8 +1,6 @@
 ---
 # defaults file for apache
-php_version: 73
 httpd_root: /var/www/html
 httpd_have_ssl: yes
-php_fpm_pool_user: apache
-php_fpm_pool_group: apache
-php_fpm_listen_url: 127.0.0.1:90{{ php_version }}
+http_ssl_certificate_file: /etc/letsencrypt/live/{{ httpd_server_name }}/fullchain.pem
+http_ssl_certificate_key: /etc/letsencrypt/live/{{ httpd_server_name }}/privkey.pem
