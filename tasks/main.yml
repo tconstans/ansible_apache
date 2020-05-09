@@ -4,16 +4,7 @@
   yum:
     name:
     - httpd
-    - mod_ssl
     state: present
-
-- name: deploy config
-  template:
-    src: "{{ item }}"
-    dest: /etc/httpd/conf.d/
-  notify: restart httpd
-  loop:
-  - ssl_redirect.conf.inc
 
 - name: set mpm
   lineinfile:
@@ -61,8 +52,14 @@
       state: present
     loop:
     - { re: "^SSLProtocol", line: "SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1" }
-    #- { re: "^SSLCertificateFile /etc/pki/tls/certs/localhost.crt", line: "SSLCertificateFile  {{ http_ssl_certificate_file}}" }
-    #- { re: "^SSLCertificateKeyFile /etc/pki/tls/private/localhost.key", line: "SSLCertificateKeyFile  {{ http_ssl_certificate_key }}" }
-  when: httpd_have_ssl
+
+  - name: deploy config
+    template:
+      src: "{{ item }}"
+      dest: /etc/httpd/conf.d/
+    notify: restart httpd
+    loop:
+    - ssl_redirect.conf.inc
+when: httpd_have_ssl
 
 
