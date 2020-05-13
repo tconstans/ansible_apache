@@ -60,6 +60,6 @@
     notify: restart httpd
     loop:
     - ssl_redirect.conf.inc
-when: httpd_have_ssl
+  when: httpd_have_ssl
 
 
